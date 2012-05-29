@@ -265,6 +265,187 @@ static __inline__ int abortboot(int bootdelay)
 }
 # endif	/* CONFIG_AUTOBOOT_KEYED */
 #endif	/* CONFIG_BOOTDELAY >= 0  */
+static void ExecuteCmd(char *cmd)
+{
+	parse_string_outer(cmd, FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP);
+}
+
+
+void sdfuse(void)
+{
+	unsigned char select;
+	while(1)
+	{
+		printf("\n##### Select the fuction #####\n");
+		printf("[1] Flash all image\n");
+		printf("[2] Flash u-boot\n");
+		printf("[3] Flash kernel\n");
+		printf("[4] Flash ramdisk\n");
+		printf("[5] Flash system\n");	
+		printf("[6] Flash userdata\n");	
+		printf("[7] Erase cache\n");		
+		printf("[8] Exit\n");
+		printf("Enter your Selection:");
+	
+		select = getc();
+		printf("%c\n", select >= ' ' && select <= 127 ? select : ' ');	
+	
+		switch(select) 
+		{
+			case '1':
+				ExecuteCmd("sdfuse flashall");
+				break;
+			
+			case '2':
+				ExecuteCmd("sdfuse flash bootloader u-boot.bin");
+				break;
+					
+			case '3':
+				ExecuteCmd("sdfuse flash kernel kernel.img");
+				break;
+			
+			case '4':
+				ExecuteCmd("sdfuse flash ramdisk ramdisk.img");
+				break;
+			
+			case '5':
+				ExecuteCmd("sdfuse flash system system.img");
+				break;
+			
+			case '6':
+				ExecuteCmd("sdfuse flash userdata userdata.img");
+				break;
+
+			case '7':
+				ExecuteCmd("sdfuse erase cache");
+				break;
+
+			case '8':
+				return;
+			
+			default:
+				break;
+		}
+	}
+}
+
+
+void radio_config(void)
+{
+	unsigned char select;
+	char *ppp_dev[3]={"radio=gsm","radio=wcdma","radio=none"};
+	char cmdline[256]="setenv bootargs console=ttySAC2,115200 noinitrd root=/dev/mtdblock3 init=/init ";
+	
+radio_config:
+	printf("\n##### Select the radio device #####\n");
+	printf("[1] GSM/GPRS\n");
+	printf("[2] WCDMA\n");
+	printf("[3] None\n");
+	printf("[4] Exit\n");
+	printf("Enter your Selection:");
+	
+	select = getc();
+	printf("%c\n", select >= ' ' && select <= 127 ? select : ' ');
+	
+	switch(select) 
+	{
+		case '1':
+		case '2':
+		case '3':
+			sprintf(cmdline + strlen(cmdline), "%s", ppp_dev[select-'1']);
+			ExecuteCmd(cmdline);
+			ExecuteCmd("saveenv");
+			break;
+
+		case '4':
+			break;
+			
+		default:
+			goto radio_config;
+	}
+}
+
+
+
+void BootMenu(void)
+{
+	unsigned char select;
+	char *command;	
+	char cramfs_cmdline[256]="setenv bootargs ";
+
+	while(1) {
+		printf("\n");
+		printf("######################## User Menu for FL210 ###################\n");	
+		printf("########################### For Android ############################\n");	
+		
+		printf("[1] Format the nand flash\n");		
+		printf("[2] Burn image from SD card\n");
+		printf("[3] Use fastboot\n");
+		printf("[4] Configure the radio device\n");	
+		printf("[5] Calibrate for multi-touch screen\n");							
+		printf("[6] Boot the system\n");
+		printf("[7] Reboot the u-boot\n");
+		printf("[8] Exit to command line\n");								
+
+		printf("-----------------------------Select---------------------------------\n");
+		printf("Enter your Selection:");
+
+		select = getc();
+		printf("%c\n", select >= ' ' && select <= 127 ? select : ' ');
+
+		switch(select) 
+		{		
+			// Boot the system		
+			
+			case '6':
+				ExecuteCmd(getenv ("bootcmd"));
+				break;
+			
+			// Configure the radio device
+		
+			case '4':
+				radio_config();
+				break;	
+	
+			// Exit to command line
+			case '8':
+				return;							
+							
+			// Format the nand flash						
+			 case '1':
+				ExecuteCmd("nand scrub");
+				break;
+			
+			//Reboot the u-boot
+			case '7':
+				ExecuteCmd("reset");
+				break;
+				
+			//Burn image from SD card
+			 case '2':
+				sdfuse();
+				break;
+				
+			//Use fastboot
+			case '3':
+				ExecuteCmd("fastboot");
+				break;	
+				
+			case '5':
+				command = getenv ("bootargs");			
+				sprintf(cramfs_cmdline + strlen(cramfs_cmdline),"%s %s",command,"calibrate");
+				ExecuteCmd(cramfs_cmdline);
+				ExecuteCmd(getenv ("bootcmd"));
+				break;							
+
+			default:
+				break;
+		}
+	}
+}
+
+
+
 
 /****************************************************************************/
 
@@ -432,7 +613,7 @@ void main_loop (void)
 	    video_banner();
 	}
 #endif
-
+	BootMenu();
 	/*
 	 * Main Loop for Monitor Command Processing
 	 */

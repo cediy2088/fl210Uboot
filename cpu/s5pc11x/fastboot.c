@@ -49,14 +49,13 @@ fastboot_ptentry ptable_default[] =
 	},
 	{
 		.name     = "ramdisk",
-		.start    = 0xB00000,
-		.length   = 0x300000,
+ 		.length   = 0x300000,
 		.flags    = 0
 	},
 	{
 		.name     = "system",
 		.start    = 0xE00000,
-		.length   = 0x6E00000,
+		.length   = 0x6E00000,//0x6E00000 110M,180M
 		.flags    = FASTBOOT_PTENTRY_FLAGS_WRITE_YAFFS
 	},
 	{

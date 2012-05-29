@@ -1718,7 +1718,13 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	{
 		LCD_turnon();
 
-		if (update_from_sd("boot", "boot.img"))
+	//	if (update_from_sd("boot", "boot.img"))
+
+		if (update_from_sd("bootloader", "u-boot.bin"))
+			goto err_sdfuse;
+		if (update_from_sd("kernel", "kernel.img"))
+			goto err_sdfuse;
+		if (update_from_sd("ramdisk", "ramdisk-yaffs.img"))
 			goto err_sdfuse;
 		if (update_from_sd("system", "system.img"))
 			goto err_sdfuse;
