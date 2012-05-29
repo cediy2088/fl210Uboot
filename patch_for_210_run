@@ -1,0 +1,54 @@
+diff --git a/board/samsung/smdkc110/lowlevel_init.S b/board/samsung/smdkc110/lowlevel_init.S
+index 5761bb6..ff29d98 100644
+--- a/board/samsung/smdkc110/lowlevel_init.S
++++ b/board/samsung/smdkc110/lowlevel_init.S
+@@ -115,7 +115,7 @@ lowlevel_init:
+ 	beq     1f			/* r0 == r1 then skip sdram init   */
+ 
+ 	/* init PMIC chip */
+-	bl PMIC_InitIp
++	//bl PMIC_InitIp  //jhk
+ 
+ 	/* init system clock */
+ 	bl system_clock_init
+diff --git a/board/samsung/smdkc110/smdkc110.c b/board/samsung/smdkc110/smdkc110.c
+index 63bacef..def7992 100644
+--- a/board/samsung/smdkc110/smdkc110.c
++++ b/board/samsung/smdkc110/smdkc110.c
+@@ -114,6 +114,23 @@ int dram_init(void)
+ 
+ 	return 0;
+ }
++int OK210_init(void)  //jhk
++{
++	ulong reg;
++
++	//printf("\nOK210_init\n");
++	reg = readl(GPJ2CON) & 0x0ff00000;
++	writel(reg | 0x01100000, GPJ2CON);
++	reg = readl(GPJ2PUD) & 0x3c00;
++	writel(reg | 0x2800, GPJ2PUD);
++	writel(readl(GPJ2DAT) & ~((1<<5)|(1<<6)), GPJ2DAT);	
++	udelay(100000);
++	writel(readl(GPJ2DAT) |(1<<6) | (1<<5), GPJ2DAT);
++	udelay(100000);
++	writel(readl(GPJ2DAT) & ~(1<<5), GPJ2DAT);
++		
++	return 0;
++}
+ 
+ #ifdef BOARD_LATE_INIT
+ #if defined(CONFIG_BOOT_NAND)
+diff --git a/include/configs/smdkv210single.h b/include/configs/smdkv210single.h
+index 5d14733..a8bf8b8 100644
+--- a/include/configs/smdkv210single.h
++++ b/include/configs/smdkv210single.h
+@@ -209,7 +209,7 @@
+ #define CONFIG_BOOTP_HOSTNAME
+ #define CONFIG_BOOTP_BOOTPATH
+ 
+-/*#define CONFIG_BOOTARGS    	"root=ramfs devfs=mount console=ttySA0,9600" */
++#define CONFIG_BOOTARGS    	"console=ttySAC2,115200 noinitrd root=/dev/mtdblock3 init=/init radio=wcdma" 
+ #define CONFIG_ETHADDR		00:40:5c:26:0a:5b
+ #define CONFIG_NETMASK          255.255.255.0
+ #define CONFIG_IPADDR		192.168.0.20
