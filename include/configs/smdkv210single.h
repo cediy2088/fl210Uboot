@@ -209,7 +209,7 @@
 #define CONFIG_BOOTP_HOSTNAME
 #define CONFIG_BOOTP_BOOTPATH
 
-/*#define CONFIG_BOOTARGS    	"root=ramfs devfs=mount console=ttySA0,9600" */
+#define CONFIG_BOOTARGS    	"console=ttySAC2,115200 noinitrd root=/dev/mtdblock3 init=/init radio=wcdma" 
 #define CONFIG_ETHADDR		00:40:5c:26:0a:5b
 #define CONFIG_NETMASK          255.255.255.0
 #define CONFIG_IPADDR		192.168.0.20

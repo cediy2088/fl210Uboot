@@ -115,7 +115,7 @@ lowlevel_init:
 	beq     1f			/* r0 == r1 then skip sdram init   */
 
 	/* init PMIC chip */
-	bl PMIC_InitIp
+	//bl PMIC_InitIp  //jhk
 
 	/* init system clock */
 	bl system_clock_init

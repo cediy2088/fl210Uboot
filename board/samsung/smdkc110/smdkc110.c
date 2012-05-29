@@ -114,6 +114,23 @@ int dram_init(void)
 
 	return 0;
 }
+int OK210_init(void)  //jhk
+{
+	ulong reg;
+
+	//printf("\nOK210_init\n");
+	reg = readl(GPJ2CON) & 0x0ff00000;
+	writel(reg | 0x01100000, GPJ2CON);
+	reg = readl(GPJ2PUD) & 0x3c00;
+	writel(reg | 0x2800, GPJ2PUD);
+	writel(readl(GPJ2DAT) & ~((1<<5)|(1<<6)), GPJ2DAT);	
+	udelay(100000);
+	writel(readl(GPJ2DAT) |(1<<6) | (1<<5), GPJ2DAT);
+	udelay(100000);
+	writel(readl(GPJ2DAT) & ~(1<<5), GPJ2DAT);
+		
+	return 0;
+}
 
 #ifdef BOARD_LATE_INIT
 #if defined(CONFIG_BOOT_NAND)
